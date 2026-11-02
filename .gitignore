@@ -1,6 +1,7 @@
 *.aux
 *.out
 *.pdf
+!report.pdf
 *.log
 .venv/
 images/
