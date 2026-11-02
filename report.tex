@@ -1,0 +1,248 @@
+\documentclass{article}
+\usepackage{tikz}
+\usepackage{polyglossia}
+\usepackage{graphicx}
+\usepackage[export]{adjustbox}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage[font=small]{caption}
+\usepackage{mathtools}
+\usepackage{booktabs}
+\usepackage{enumitem}
+
+\graphicspath{{./images}}
+
+\setdefaultlanguage{english}
+\setotherlanguage{farsi}
+
+\usepackage{fontspec}
+\newfontfamily\englishfont[Script=Latin,Mapping=tex-text]{Times New Roman}
+\newfontfamily\farsifont[Script=Arabic]{Nazanin}
+
+\usepackage{xepersian}
+\settextfont{Nazanin}
+\setlatintextfont{Times New Roman}
+
+\usepackage{expex}
+\lingset{everygla=\englishfont\beginL\footnotesize\it, everyglc=\englishfont\beginL\footnotesize}
+
+\pagestyle{fancy}
+\fancyhf{} 
+
+\lhead{} 
+\chead{} 
+\rhead{\latinfont \footnotesize گزارش پروژه تکمیلی درس سیگنال و سیستم‌ها} 
+
+\lfoot{}
+\cfoot{} 
+\rfoot{\thepage} 
+\renewcommand{\footrulewidth}{0.4pt}
+\renewcommand{\thesection}{\farsifont\arabic{section}}
+
+\usetikzlibrary{arrows.meta}   
+
+% \fancypagestyle{p4}{\fancyfoot[L]{\latinfont \beginL \footnotesize 1-Learning Rate }} footnote sample
+
+
+\begin{document}
+\begin{RTL}
+    \begin{titlepage}
+        \begin{center}
+            {\fontsize{40}{50}\selectfont به نام خداوند}   
+            \begin{figure}[H]
+                \centering
+                \includegraphics[height=.55\textheight, width=\textwidth]{AUTlogo.png}
+            \end{figure}
+            {\Huge\bfseries گزارش پروژه تکمیلی درس سیگنال و سیستم‌ها \par}
+            {\Large\itshape کاوه احمدی ۴۰۱۳۱۹۰۴ \par}
+            {\Large خرداد ۱۴۰۴ \par}
+            \thispagestyle{empty}
+            \newpage
+        \end{center}
+    \end{titlepage}
+    
+    \section{انواع تابع‌های پنجره \lr{(Window Functions)}}
+        \subsection{تابع پنجره هن \lr{(Hann Window)}}
+فرمول ریاضی:
+\beginL $w(n) = 0.5 \left(1 - \cos\left(\frac{2\pi n}{N-1}\right)\right), \quad n = 0, 1, ..., N-1$\\ \endL
+
+\textbf{شیوه عمل:}
+\begin{enumerate}[label=\alph*)]
+\item تابع کسینوسی از 0 تا $\pi$ نوسان می‌کند
+\item تقسیم بر 0.5 باعث جابجایی مقادیر بین 0 تا 1 می‌شود
+\item این تابع در مقایسه با پنجره مستطیلی نشتی طیفی کمتری دارد
+\item برای بررسی سیگنال‌هایی با فرکانس‌های نزدیک مناسب است
+\end{enumerate}
+
+\subsection{تابع پنجره همینگ \lr{(Hamming Window)}}
+فرمول ریاضی:
+\beginL $
+w(n) = 0.54 - 0.46 \cos\left(\frac{2\pi n}{N-1}\right), \quad n = 0, 1, ..., N-1
+$\\ \endL
+
+\textbf{مشخصات ویژه:}
+\begin{enumerate}[label=\alph*)]
+\item ضرایب 0.54 و 0.46 برای بهبود سطح لوب‌های جانبی انتخاب شده‌اند
+\item نسبت به پنجره هن، مقدار حداقل بالاتری دارد (0.08 به جای 0)
+\item لوب اصلی عریض‌تر اما لوب‌های جانبی کوچک‌تر است
+\end{enumerate}
+
+\subsection{تابع پنجره مستطیلی \lr{(Rectangular Window)}}
+فرمول ریاضی:
+\beginL $
+w(n) = 1, \quad n = 0, 1, ..., N-1
+$\\ \endL
+
+\textbf{محدودیت‌ها و معایب:}
+\begin{enumerate}[label=\alph*)]
+\item بیشترین میزان نشتی طیفی را داراست
+\item لوب‌های جانبی قوی ایجاد می‌کند
+\item تنها زمانی مناسب است که کل سیگنال درون پنجره قرار گیرد
+\end{enumerate}
+
+\section{تبدیل فوریه سریع \lr{(FFT)}}
+
+\subsection{الگوریتم بازگشتی \lr{Cooley-Tukey}}
+این روش از تکنیک تقسیم و حل بهره می‌برد که پیچیدگی DFT را از $O(N^2)$ به $O(N \log N)$ کاهش می‌دهد.
+
+\textbf{مرحله تجزیه:}
+\beginL $
+X_\text{even}[k] = \sum_{n=0}^{N/2-1} x[2n] e^{-j2\pi kn/(N/2)} \\
+X_\text{odd}[k] = \sum_{n=0}^{N/2-1} x[2n+1] e^{-j2\pi kn/(N/2)}
+$\\ \endL
+
+\textbf{مرحله ادغام:}
+\beginL $
+X[k] = X_\text{even}[k] + W_N^k \cdot X_\text{odd}[k] \\
+X[k + N/2] = X_\text{even}[k] - W_N^k \cdot X_\text{odd}[k]
+$\\ \endL
+
+که در آن $W_N^k = e^{-j2\pi k/N}$ تعریف می‌شود.
+
+\textbf{نحوه کار الگوریتم:}
+\begin{enumerate}[label=\alph*)]
+\item شرط توقف: اگر $N \leq 1$ باشد، سیگنال همان FFT است
+\item بررسی توان ۲: در صورت عدم تطابق $N$ با توان ۲، پد صفر انجام می‌شود
+\item تجزیه: سیگنال به بخش‌های زوج و فرد تقسیم می‌گردد
+\item بازگشت: FFT برای قسمت‌های زوج و فرد محاسبه می‌شود
+\item محاسبه عامل پیچشی: $T = e^{-2j\pi k/N}$ برای $k = 0, ..., N/2-1$
+\item ترکیب نتایج با استفاده از تقارن DFT
+\end{enumerate}
+
+\subsection{افزودن صفر \lr{(Zero Padding)}}
+در صورتی که طول سیگنال توان ۲ نباشد، با صفر پر می‌شود:
+\beginL $
+N_\text{new} = 2^{\lceil \log_2(N) \rceil}
+$\\ \endL
+
+\textbf{دلیل استفاده از \lr{zero padding}:}
+\begin{enumerate}[label=\alph*)]
+\item الگوریتم \lr{Cooley-Tukey} نیازمند طول توان ۲ است
+\item تابع \lr{np.pad} با حالت \lr{'constant'} صفرهای اضافی می‌افزاید
+\item این عمل دقت FFT را تغییر نمی‌دهد و فقط تفکیک‌پذیری در حوزه فرکانس ایجاد می‌کند
+\end{enumerate}
+
+\section{تبدیل فوریه کوتاه‌مدت (STFT)}
+
+\subsection{فرمول کلی STFT}
+\beginL $
+X(m, \omega) = \sum_{n=-\infty}^{\infty} x(n) w(n-m) e^{-j\omega n}
+$\\ \endL
+
+که در آن:
+\begin{enumerate}[label=\alph*)]
+\item $x(n)$: سیگنال ورودی اصلی
+\item $w(n)$: تابع پنجره به کار رفته
+\item $m$: شاخص فریم در زمان
+\item $\omega$: فرکانس مورد بررسی
+\end{enumerate}
+
+\subsection{پارامترهای به کار رفته}
+اندازه گام:
+\beginL $
+\text{hop\_size} = \text{window\_length} - \text{overlap}
+$\\ \endL
+
+تعداد فریم‌ها:
+\beginL $
+\text{num\_frames} = \max\left(1, \left\lfloor\frac{\text{signal\_length} - \text{window\_length}}{\text{hop\_size}}\right\rfloor + 1\right)
+$\\ \endL
+
+\subsection{روند اصلی الگوریتم}
+\begin{enumerate}[label=\alph*)]
+\item سیگنال به فریم‌های همپوشان تقسیم‌بندی می‌شود
+\item تابع پنجره روی هر فریم اعمال می‌گردد:
+\[
+x_\text{windowed}[n] = x[n] \cdot w[n]
+\]
+\item FFT برای هر فریم محاسبه می‌شود
+\item نتایج در ماتریس STFT ذخیره می‌گردند
+\end{enumerate}
+
+\section{محاسبه محورهای زمان و فرکانس}
+\subsection{محور زمان}
+\beginL $
+t[i] = \frac{i \cdot \text{hop\_size} + \text{window\_length}/2}{\text{sample\_rate}}
+$\\ \endL
+
+\textbf{پایه محاسبات:}
+\begin{enumerate}[label=\alph*)]
+\item $i \cdot \text{hop\_size}$: مکان آغازین فریم
+\item $+\ \text{window\_length}/2$: جابجایی به مرکز پنجره
+\item تقسیم بر \text{sample\_rate}: تبدیل تعداد نمونه‌ها به ثانیه
+\end{enumerate}
+
+\subsection{محور فرکانس}
+فرکانس‌های مثبت:
+\[
+f[k] = \frac{k \cdot \text{sample\_rate}}{\text{window\_length}}, \quad k = 0, 1, ..., \left\lfloor \frac{N}{2} \right\rfloor
+\]
+
+فرکانس‌های منفی:
+\[
+f[k] = \frac{(k - N) \cdot \text{sample\_rate}}{\text{window\_length}}, \quad k = \left\lfloor \frac{N}{2} \right\rfloor + 1, ..., N-1
+\]
+
+\textbf{توضیحات تکمیلی:}
+\begin{enumerate}[label=\alph*)]
+\item خروجی FFT به ترتیب [DC، فرکانس مثبت، فرکانس منفی] است
+\item فرکانس نیquist: $\frac{\text{sample\_rate}}{2}$
+\item فاصله فرکانسی: $\Delta f = \frac{\text{sample\_rate}}{\text{window\_length}}$
+\end{enumerate}
+
+\section{سیگنال‌های آزمایشی}
+
+\subsection{چرپ خطی}
+\[
+x(t) = \sin\left(2\pi(f_0 t + \frac{k}{2}t^2)\right)
+\]
+
+\subsection{چرپ نمایی}
+\[
+x(t) = \sin\left(2\pi f_0 \cdot \frac{r^t - 1}{\ln(r)}\right)
+\]
+
+\subsection{سیگنال سینوسی قطعه‌ای}
+\[
+x(t) = \begin{cases}
+\sin(2\pi \cdot 300 \cdot t) & 0 \leq t < 2 \\
+\sin(2\pi \cdot 500 \cdot t) & 2 \leq t < 4 \\
+\sin(2\pi \cdot 400 \cdot t) & 4 \leq t < 6 \\
+0 & \text{در غیر این صورت}
+\end{cases}
+\]
+
+\section{جمع‌بندی}
+
+این پیاده‌سازی شامل موارد زیر می‌باشد:
+\begin{enumerate}[label=\alph*)]
+\item FFT بازگشتی با پیچیدگی محاسباتی $O(N \log N)$
+\item سه نوع تابع پنجره با خصوصیات متمایز
+\item STFT با تنظیمات قابل تغییر
+\item محاسبه دقیق محورهای زمان-فرکانس
+\item مجموعه‌ای از سیگنال‌های آزمایشی برای سنجش عملکرد
+\end{enumerate}
+
+    
+\end{RTL}
+\end{document}
